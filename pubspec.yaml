@@ -12,7 +12,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_chat_types: ^2.1.2
+  flutter_chat_types:
+    git:
+      url: https://github.com/sarbogast/flutter_chat_types
+      ref: feature/audio_message_types
   flutter_linkify: ^5.0.2
   html: ^0.15.0
   http: ^0.13.3
