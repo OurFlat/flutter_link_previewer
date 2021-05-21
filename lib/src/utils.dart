@@ -119,6 +119,10 @@ Future<Size> _getImageSize(String url) {
 }
 
 Future<String> _getBiggestImageUrl(List<String> imageUrls) async {
+  if (imageUrls.length > 5) {
+    imageUrls.removeRange(5, imageUrls.length);
+  }
+
   var currentUrl = imageUrls[0];
   var currentArea = 0.0;
 
@@ -149,13 +153,28 @@ Future<PreviewData> getPreviewData(String text) async {
     if (matches.isEmpty) return previewData;
 
     var url = text.substring(matches.first.start, matches.first.end);
-    if (!url.startsWith('http')) {
+    if (!url.toLowerCase().startsWith('http')) {
       url = 'https://' + url;
     }
     previewDataUrl = url;
     final uri = Uri.parse(url);
     final response = await http.get(uri);
     final document = parser.parse(response.body);
+
+    final imageRegexp = RegExp(REGEX_IMAGE_CONTENT_TYPE);
+
+    if (imageRegexp.hasMatch(response.headers['content-type'] ?? '')) {
+      final imageSize = await _getImageSize(previewDataUrl);
+      previewDataImage = PreviewDataImage(
+        height: imageSize.height,
+        url: previewDataUrl,
+        width: imageSize.width,
+      );
+      return PreviewData(
+        image: previewDataImage,
+        link: previewDataUrl,
+      );
+    }
 
     if (!_hasUTF8Charset(document)) {
       return previewData;
@@ -204,5 +223,9 @@ Future<PreviewData> getPreviewData(String text) async {
   }
 }
 
+/// Regex to check if content type is an image
+const REGEX_IMAGE_CONTENT_TYPE = r'image\/*';
+
 /// Regex to find all links in the text
-const REGEX_LINK = r'(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-?=%.]+';
+const REGEX_LINK =
+    r'([\w+]+\:\/\/)?([\w\d-]+\.)*[\w-]+[\.\:]\w+([\/\?\=\&\#\.]?[\w-]+)*\/?';

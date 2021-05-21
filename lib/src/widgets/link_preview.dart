@@ -15,6 +15,8 @@ class LinkPreview extends StatefulWidget {
     Key? key,
     this.animationDuration,
     this.enableAnimation = false,
+    this.header,
+    this.headerStyle,
     this.linkStyle,
     this.metadataTextStyle,
     this.metadataTitleStyle,
@@ -32,6 +34,12 @@ class LinkPreview extends StatefulWidget {
 
   /// Enables expand animation. Default value is false.
   final bool? enableAnimation;
+
+  /// Custom header above provided text
+  final String? header;
+
+  /// Style of the custom header
+  final TextStyle? headerStyle;
 
   /// Style of highlighted links in the text
   final TextStyle? linkStyle;
@@ -143,6 +151,18 @@ class _LinkPreviewState extends State<LinkPreview>
     }
   }
 
+  bool _hasData(PreviewData? previewData) {
+    return previewData?.title != null ||
+        previewData?.description != null ||
+        previewData?.image?.url != null;
+  }
+
+  bool _hasOnlyImage() {
+    return widget.previewData?.title == null &&
+        widget.previewData?.description == null &&
+        widget.previewData?.image?.url != null;
+  }
+
   Future<void> _onOpen(LinkableElement link) async {
     if (await canLaunch(link.url)) {
       await launch(link.url);
@@ -217,10 +237,21 @@ class _LinkPreviewState extends State<LinkPreview>
                     left: _padding.left,
                     right: _padding.right,
                     top: _padding.top,
-                    bottom: 16),
+                    bottom: _hasOnlyImage() ? 0 : 16,
+                  ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                if (widget.header != null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Text(
+                      widget.header!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: widget.headerStyle,
+                    ),
+                  ),
                 _linkify(),
                 if (withPadding && child != null)
                   shouldAnimate ? _animated(child) : child,
@@ -260,10 +291,11 @@ class _LinkPreviewState extends State<LinkPreview>
   }
 
   Widget _linkify() {
-    return Linkify(
+    return SelectableLinkify(
       linkifiers: [UrlLinkifier()],
       linkStyle: widget.linkStyle,
       maxLines: 100,
+      minLines: 1,
       onOpen: widget.onLinkPressed != null
           ? (element) => widget.onLinkPressed!(element.url)
           : _onOpen,
@@ -338,7 +370,7 @@ class _LinkPreviewState extends State<LinkPreview>
 
   @override
   Widget build(BuildContext context) {
-    if (widget.previewData != null) {
+    if (widget.previewData != null && _hasData(widget.previewData)) {
       final aspectRatio = widget.previewData!.image == null
           ? null
           : widget.previewData!.image!.width /
