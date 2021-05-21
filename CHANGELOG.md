@@ -1,3 +1,29 @@
+## 2.0.7
+
+- Fix alignment
+
+## 2.0.6
+
+- Update to Flutter 2.2
+
+## 2.0.5
+
+- Fix links starting from a capital `Http`
+
+## 2.0.4
+
+- Add preview for the image link
+
+## 2.0.3
+
+- Add a custom header above the text
+
+## 2.0.2
+
+- Fix paddings for an empty preview data
+- Limit number of images parsed
+- Fix regex
+
 ## 2.0.1
 
 - Fix custom padding and add a custom link press handler
