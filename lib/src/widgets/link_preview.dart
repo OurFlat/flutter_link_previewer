@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' show PreviewData;
 import 'package:flutter_linkify/flutter_linkify.dart' hide UrlLinkifier;
 import 'package:url_launcher/url_launcher.dart';
+
 import '../url_linkifier.dart' show UrlLinkifier;
 import '../utils.dart' show getPreviewData;
 
@@ -79,8 +80,7 @@ class LinkPreview extends StatefulWidget {
   _LinkPreviewState createState() => _LinkPreviewState();
 }
 
-class _LinkPreviewState extends State<LinkPreview>
-    with SingleTickerProviderStateMixin {
+class _LinkPreviewState extends State<LinkPreview> with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     duration: widget.animationDuration ?? const Duration(milliseconds: 300),
     vsync: this,
@@ -152,9 +152,7 @@ class _LinkPreviewState extends State<LinkPreview>
   }
 
   bool _hasData(PreviewData? previewData) {
-    return previewData?.title != null ||
-        previewData?.description != null ||
-        previewData?.image?.url != null;
+    return previewData?.title != null || previewData?.description != null || previewData?.image?.url != null;
   }
 
   bool _hasOnlyImage() {
@@ -201,8 +199,7 @@ class _LinkPreviewState extends State<LinkPreview>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               if (data.title != null) _titleWidget(data.title!),
-              if (data.description != null)
-                _descriptionWidget(data.description!),
+              if (data.description != null) _descriptionWidget(data.description!),
             ],
           ),
         ),
@@ -253,13 +250,11 @@ class _LinkPreviewState extends State<LinkPreview>
                     ),
                   ),
                 _linkify(),
-                if (withPadding && child != null)
-                  shouldAnimate ? _animated(child) : child,
+                if (withPadding && child != null) shouldAnimate ? _animated(child) : child,
               ],
             ),
           ),
-          if (!withPadding && child != null)
-            shouldAnimate ? _animated(child) : child,
+          if (!withPadding && child != null) shouldAnimate ? _animated(child) : child,
         ],
       ),
     );
@@ -278,15 +273,16 @@ class _LinkPreviewState extends State<LinkPreview>
   }
 
   Widget _imageWidget(String url, double width) {
-    return Container(
-      constraints: BoxConstraints(
-        maxHeight: width,
-      ),
-      width: width,
-      child: Image.network(
-        url,
-        fit: BoxFit.fitWidth,
-      ),
+    return Image.network(
+      url,
+      fit: BoxFit.fitWidth,
+      frameBuilder: (context, child, frame, wasSynchronouslyLoaded) => Container(
+          constraints: BoxConstraints(
+            maxHeight: width,
+          ),
+          width: width,
+          child: child),
+      errorBuilder: (context, error, stackTrace) => Container(),
     );
   }
 
@@ -296,9 +292,7 @@ class _LinkPreviewState extends State<LinkPreview>
       linkStyle: widget.linkStyle,
       maxLines: 100,
       minLines: 1,
-      onOpen: widget.onLinkPressed != null
-          ? (element) => widget.onLinkPressed!(element.url)
-          : _onOpen,
+      onOpen: widget.onLinkPressed != null ? (element) => widget.onLinkPressed!(element.url) : _onOpen,
       options: const LinkifyOptions(
         defaultToHttps: true,
         humanize: false,
@@ -326,14 +320,12 @@ class _LinkPreviewState extends State<LinkPreview>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         if (data.title != null) _titleWidget(data.title!),
-                        if (data.description != null)
-                          _descriptionWidget(data.description!),
+                        if (data.description != null) _descriptionWidget(data.description!),
                       ],
                     ),
                   ),
                 ),
-                if (data.image?.url != null)
-                  _minimizedImageWidget(data.image!.url),
+                if (data.image?.url != null) _minimizedImageWidget(data.image!.url),
               ],
             ),
           ),
@@ -342,14 +334,14 @@ class _LinkPreviewState extends State<LinkPreview>
   }
 
   Widget _minimizedImageWidget(String url) {
-    return ClipRRect(
-      borderRadius: const BorderRadius.all(
-        Radius.circular(12),
-      ),
-      child: SizedBox(
-        height: 48,
-        width: 48,
-        child: Image.network(url),
+    return Image.network(
+      url,
+      errorBuilder: (context, error, stackTrace) => Container(),
+      frameBuilder: (context, child, frame, wasSynchronouslyLoaded) => ClipRRect(
+        borderRadius: const BorderRadius.all(
+          Radius.circular(12),
+        ),
+        child: SizedBox(height: 48, width: 48, child: child),
       ),
     );
   }
@@ -373,8 +365,7 @@ class _LinkPreviewState extends State<LinkPreview>
     if (widget.previewData != null && _hasData(widget.previewData)) {
       final aspectRatio = widget.previewData!.image == null
           ? null
-          : widget.previewData!.image!.width /
-              widget.previewData!.image!.height;
+          : widget.previewData!.image!.width / widget.previewData!.image!.height;
 
       final _width = aspectRatio == 1 ? widget.width : widget.width - 32;
 
